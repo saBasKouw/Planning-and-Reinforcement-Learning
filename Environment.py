@@ -1,32 +1,39 @@
-import Actions
-
 class Environment:
     def __init__(self):
-        # 0 ice
-        # 1 is crack
-        # 2 is goal
-        # 3 is start
-        # 4 is ship
-        self.world = [[0, 0, 0, 2],
+        self.map = [[0, 0, 0, 2],
                       [0, 1, 0, 1],
-                      [0, 0, 4, 1],
-                      [3, 1, 1, 1]]
+                      [0, 0, 3, 1],
+                      [0, 1, 1, 1]]
 
-        self.actions = Actions()
+    def what_tile(self, robot):
+        tile = self.map[robot.y][robot.x]
+        if tile == 0:
+            return "ice"
+        elif tile == 1:
+            return "crack"
+        elif tile == 2:
+            return "goal"
+        elif tile == 3:
+            return "ship"
 
-    def which_tile(self, coordinate):
-        return self.world[coordinate[1]][coordinate[0]]
+    def is_on_ice(self, rob):
+        tile = self.what_tile(rob)
+        return tile == "ice"
+
+    def is_on_ship(self, rob):
+        tile = self.what_tile(rob)
+        return tile == "ship"
+
+    def is_on_goal(self, rob):
+        tile = self.what_tile(rob)
+        return tile == "goal"
+
+    def is_on_crack(self, rob):
+        tile = self.what_tile(rob)
+        return tile == "crack"
 
 
-    def move(self, move, coordinate):
-        if move == "left":
-            return "left", [coordinate[0]-1, coordinate[1]]
-        elif move == "right":
-            return [coordinate[0]+1, coordinate[1]]
-        elif move == "up":
-            return [coordinate[0], coordinate[1]-1]
-        elif move == "down":
-            return [coordinate[0], coordinate[1]+1]
+
 
 
 
