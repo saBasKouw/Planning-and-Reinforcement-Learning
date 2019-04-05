@@ -11,23 +11,38 @@ import numpy as np
 #                       [4, 2, 2, 2]]
 starting_point = [4,0]
 
-def on_ice(position):
+def on_ice(position,transform,points):
     slip = [0.05,0.95]
     result = np.random.choice(2,1,p=slip)
     if result == 1:
-        return position
+        return position,points
     if result == 0:
-        newposition = world[0][0]
+        max_y = 3
+        max_x = 3
+        if "DOWN":
+            position[0] = max_y
+        elif "UP":
+            position[0] = 0
+        elif "RIGHT":
+            position[1] = max_x
+        elif "LEFT":
+            points[1] = 0
+        return position,points
 
-def on_crack(position):
+def on_crack(position,points):
     new_position = starting_point
-    return new_position
+    new_points = points-10
+    return new_position,new_points
 
-def out_grid(position):
+def out_grid(position,points):
     new_position = old_position
-    return new_position
+    new_points = points
+    return new_position,new_points
 
-def on_ship(position):
-    return position
+def on_ship(position,points):
+    new_points = points+20
+    return position, new_points
 
-on_ice()
+def on_goal(position,points):
+    new_points = points+100
+    return position, new_points
