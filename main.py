@@ -84,16 +84,16 @@ while True:
 
     if env.is_on_crack(rob):
         deaths += 1
-        print(rob.track)
+        rob.reward -= 10
         rob, env = init_world()
     elif env.is_on_goal(rob):
         reached_goal += 1
-        rob.reward += 1000
+        rob.reward += 100
         print(rob.track)
         rob, env = init_world()
     elif env.is_on_ship(rob):
         env.map[rob.y][rob.x] = 4
-        rob.reward += 100
+        rob.reward += 20
     else:
         rob.reward += 1
 
