@@ -1,9 +1,9 @@
 class Environment:
     def __init__(self):
         self.map = [[0, 0, 0, 2],
-                      [0, 1, 0, 1],
-                      [0, 0, 3, 1],
-                      [0, 1, 1, 1]]
+                    [0, 1, 0, 1],
+                    [0, 0, 3, 1],
+                    [0, 1, 1, 1]]
 
     def what_tile(self, robot):
         tile = self.map[robot.y][robot.x]
