@@ -7,6 +7,12 @@ class Environment:
 
 
 
+    def index_of_state(self,x,y):
+        count = 0
+        for i in range(y):
+            for b in range(x):
+                count += 1
+        return count
 
     def what_tile(self, coor):
         tile = self.map[coor[1]][coor[0]]
@@ -26,11 +32,10 @@ class Environment:
             for x in range(4):
                 count +=1
                 if count == state:
-                    return [(x-1, y),
-                            (x+1, y),
-                            (x, y-1),
-                            (x, y+1)]
-
+                    return [(x-1, y, "left"),
+                            (x+1, y, "right"),
+                            (x, y-1, "up"),
+                            (x, y+1, "down")]
 
     def get_tile(self, state):
         count = -1
