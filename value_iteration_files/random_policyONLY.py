@@ -160,20 +160,5 @@ def calculate_value(state, arr):
 
     return value_of_s_primes
 
-
-    # print(state_values, "\n")
-
-    # #Create the value table
-    # value_matrix = list(map(list,table))
-    # counter = 0
-    # for i in range(4):
-    #     for j in range(4):
-    #         value_matrix[i][j] = state_values[counter]
-    #         counter += 1
-    # for i in range(4):
-    #     print(value_matrix[i])
-    # print(state_values)
-
-    # Check according to the value table what the best path is.
 policy_evaluation()
 
