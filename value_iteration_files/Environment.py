@@ -10,8 +10,9 @@ class Environment:
     def index_of_state(self,x,y):
         count = 0
         for i in range(y):
-            for b in range(x):
-                count += 1
+            count +=1
+        for b in range(x):
+            count += 1
         return count
 
     def what_tile(self, coor):

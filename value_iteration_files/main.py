@@ -175,22 +175,22 @@ def calculate_value(state, arr):
     #reward = 0
     value_of_s_primes = [0, 0, 0, 0]
     discount_factor = 0.5
+    prob_no_slip = 0.95
+    for i, action in enumerate(arr):
+        slip_reward, slip_state = slip_transition(action)
 
-    for i, s_prime in enumerate(arr):
-        slip_reward, slip_state = slip_transition(s_prime)
-
-        if env.what_tile(env.get_tile(state)) == "crack" or env.what_tile(env.get_tile(slip_state)) == "crack":
-            return calculate_value(12, env.surroundings_of(12))
-
-        if out_of_bounds(s_prime):
-            value = 1*(reward + discount_factor * state_values[state]) #Out of bounds direction will have same value for slipping so can be combined into prob 1
+        if env.what_tile(env.get_tile(state)) == "crack" or env.what_tile(env.get_tile(state)) == "goal":
+            # return calculate_value(12, env.surroundings_of(12))
+            value = 0
+        elif out_of_bounds(action):
+            value = 1*(0 + discount_factor * state_values[state]) #Out of bounds direction will have same value for slipping so can be combined into prob 1
         else:
-            next_state = table[s_prime[1]][s_prime[0]]
+            next_state = table[action[1]][action[0]]
             reward_s_prime = tile_reward(env.get_tile(next_state),env)
-            value = 0.95 * (reward_s_prime + discount_factor * state_values[next_state]) + 0.05 *(
+            value = prob_no_slip * (reward_s_prime + discount_factor * state_values[next_state]) + (1-prob_no_slip) *(
                         slip_reward + discount_factor * state_values[slip_state])
 
-        value_of_s_primes[i] = (value,s_prime[2])
+        value_of_s_primes[i] = (value,action[2])
 
     return value_of_s_primes
 
@@ -202,8 +202,9 @@ def policy_iteration_init():
         policy_evaluation(current_policy)
         changing = policy_iteration()
         print("Policy iteration: ", iteration)
-    print("Final policy: ",current_policy)
+    print("Final policy: ", current_policy)
     print("Optimal path:", get_optimal_path())
+    print("State values:", state_values)
 
 def get_optimal_path():
     state = 12
@@ -221,7 +222,7 @@ def get_optimal_path():
         path_coor = sur[index]
         state = table[path_coor[1]][path_coor[0]]
         path.append(state)
-        if state == 3:
+        if state == 2:
             return path
 
 def value_iteration():
@@ -257,8 +258,9 @@ def value_iteration():
 
     # Check according to the value table what the best path is.
 
-
+    #state_values[3]=100
     print("optimal path: ", get_optimal_path())
     print("values", state_values)
 
-value_iteration()
+policy_iteration_init()
+#value_iteration()

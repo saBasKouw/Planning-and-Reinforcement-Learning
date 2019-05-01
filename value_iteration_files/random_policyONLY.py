@@ -137,26 +137,28 @@ def slip_transition(s_prime):
     return slip_reward, slip_state
 
 def calculate_value(state, arr):
-    reward = tile_reward(env.get_tile(state),env)
+    reward = tile_reward(env.get_tile(state), env)
+    # reward = 0
     value_of_s_primes = [0, 0, 0, 0]
-    #policy evaluation applied with a discount factor of 0.9 as specified in the assignment
     discount_factor = 0.9
+    prob_no_slip = 0.95
+    for i, action in enumerate(arr):
+        slip_reward, slip_state = slip_transition(action)
 
-    for i, s_prime in enumerate(arr):
-        slip_reward, slip_state = slip_transition(s_prime)
-
-        if env.what_tile(env.get_tile(state)) == "crack" or env.what_tile(env.get_tile(slip_state)) == "crack":
-            return calculate_value(12, env.surroundings_of(12))
-
-        if out_of_bounds(s_prime):
-            value = 1*(reward + discount_factor * state_values[state]) #Out of bounds direction will have same value for slipping so can be combined into prob 1
+        if env.what_tile(env.get_tile(state)) == "crack" or env.what_tile(env.get_tile(state)) == "goal":
+            # return calculate_value(12, env.surroundings_of(12))
+            value = 0
+        elif out_of_bounds(action):
+            value = 1 * (0 + discount_factor * state_values[
+                state])  # Out of bounds direction will have same value for slipping so can be combined into prob 1
         else:
-            next_state = table[s_prime[1]][s_prime[0]]
-            reward_s_prime = tile_reward(env.get_tile(next_state),env)
-            value = 0.95 * (reward_s_prime + discount_factor * state_values[next_state]) + 0.05 *(
-                        slip_reward + discount_factor * state_values[slip_state])
+            next_state = table[action[1]][action[0]]
+            reward_s_prime = tile_reward(env.get_tile(next_state), env)
+            value = prob_no_slip * (reward_s_prime + discount_factor * state_values[next_state]) + (
+                        1 - prob_no_slip) * (
+                            slip_reward + discount_factor * state_values[slip_state])
 
-        value_of_s_primes[i] = (value,s_prime[2])
+        value_of_s_primes[i] = (value, action[2])
 
     return value_of_s_primes
 
