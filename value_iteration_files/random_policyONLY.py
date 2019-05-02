@@ -143,7 +143,6 @@ def calculate_value(state, arr):
     discount_factor = 0.9
     prob_no_slip = 0.95
     for i, action in enumerate(arr):
-        slip_reward, slip_state = slip_transition(action)
 
         if env.what_tile(env.get_tile(state)) == "crack" or env.what_tile(env.get_tile(state)) == "goal":
             # return calculate_value(12, env.surroundings_of(12))
@@ -152,6 +151,7 @@ def calculate_value(state, arr):
             value = 1 * (0 + discount_factor * state_values[
                 state])  # Out of bounds direction will have same value for slipping so can be combined into prob 1
         else:
+            slip_reward, slip_state = slip_transition(action)
             next_state = table[action[1]][action[0]]
             reward_s_prime = tile_reward(env.get_tile(next_state), env)
             value = prob_no_slip * (reward_s_prime + discount_factor * state_values[next_state]) + (

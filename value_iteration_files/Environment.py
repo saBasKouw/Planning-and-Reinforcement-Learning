@@ -2,7 +2,7 @@ class Environment:
     def __init__(self):
         self.map = [[0, 0, 0, 2],
                     [0, 1, 0, 1],
-                    [0, 0, 0, 1],
+                    [0, 0, 3, 1],
                     [0, 1, 1, 1]]
 
 
@@ -10,21 +10,24 @@ class Environment:
     def index_of_state(self,x,y):
         count = 0
         for i in range(y):
-            count +=1
+            count += 4
         for b in range(x):
             count += 1
         return count
 
     def what_tile(self, coor):
-        tile = self.map[coor[1]][coor[0]]
-        if tile == 0:
-            return "ice"
-        elif tile == 1:
-            return "crack"
-        elif tile == 2:
-            return "goal"
-        elif tile == 3:
-            return "ship"
+        try:
+            tile = self.map[coor[1]][coor[0]]
+            if tile == 0:
+                return "ice"
+            elif tile == 1:
+                return "crack"
+            elif tile == 2:
+                return "goal"
+            elif tile == 3:
+                return "ship"
+        except TypeError:
+            print("WRONG",coor)
 
 
     def surroundings_of(self, state):
