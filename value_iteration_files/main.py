@@ -146,7 +146,7 @@ def policy_evaluation(policy):
         if difference < stop_condition:
             break
 
-def policy_iteration():
+def policy_iteration(simple):
     changing = False
     for state in range(num_states):
         chosen_a = max(current_policy[state],key=current_policy[state].get)
@@ -157,6 +157,8 @@ def policy_iteration():
             changing = True
             current_policy[state] = no_probs.copy()
             current_policy[state][best_a[1]] = 1
+            if simple:
+                break
     return changing
 
 
@@ -174,7 +176,7 @@ def slip_transition(s_prime):
 def calculate_value(state, arr):
     reward = tile_reward(env.get_tile(state),env)
     value_of_actions = [0, 0, 0, 0]
-    discount_factor = 0.5
+    discount_factor = 0.9
     prob_no_slip = 0.95
     for i, action in enumerate(arr):
         if env.what_tile(env.get_tile(state)) == "crack" or env.what_tile(env.get_tile(state)) == "goal":
@@ -193,13 +195,13 @@ def calculate_value(state, arr):
 
     return value_of_actions
 
-def policy_iteration_init():
+def policy_iteration_init(simple):
     iteration = 0
     changing = True
     while changing:
         iteration += 1
         policy_evaluation(current_policy)
-        changing = policy_iteration()
+        changing = policy_iteration(simple)
         print("Policy iteration: ", iteration)
     print("Final policy: ", current_policy)
     print("Optimal path:", get_optimal_path())
@@ -237,17 +239,20 @@ def value_iteration():
     # delta = 0
     # while delta < theta:
     stop_condition = 0.0001
+    index = 0
     while True:
         difference = 0
         for state in range(num_states):
             sur = env.surroundings_of(state)
             actions = calculate_value(state, sur)  # gets the values of each action so the value for all 4 next states
             # with exception of state == crack then values are 0 or when state is goal then values are 100
-            print(state, actions)
+            #print(state, actions)
             best_action_value = max([value[0] for value in actions])  # get the value of the best action.
             difference = max(difference, np.abs(best_action_value - state_values[state])) # this delta method did not work for me
             # wonder why
             state_values[state] = best_action_value
+        index += 1
+        print("Value iteration:",index)
         if difference < stop_condition:
             break
 
@@ -272,6 +277,6 @@ def value_iteration():
 
 t1 = t.time()
 #value_iteration()
+policy_iteration_init(True)
 t2 = t.time()
 print("Time elapsed:",t2-t1)
-policy_iteration_init()
