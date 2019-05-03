@@ -105,27 +105,6 @@ def tile_reward(tile, env):
 
         return 0
 
-##########BELOW IS THE VALUE ITERATION
-# def get_actions(env, state):
-#     sur = env.surroundings_of(state)
-#     value_of_actions = [0, 0, 0, 0]
-#
-#     if env.what_tile(env.get_tile(state)) == "crack": # if you remove this cracks are good states
-#         #  because often the next statesof a crack are better than the next states of ice
-#         return value_of_actions
-#     for i, next_tile in enumerate(sur):
-#         if out_of_bounds(next_tile):
-#             value_of_actions[i] = 0
-#         else:
-#             if env.what_tile(env.get_tile(state)) == "goal": # if you remove this then goal is not a good next state
-#                 reward = 100
-#             else:
-#                 reward = tile_reward(next_tile, env)
-#
-#             next_state = table[next_tile[1]][next_tile[0]]
-#             value_of_actions[i] += 0.95 * (reward + 0.9 * state_values[next_state])
-#
-#     return value_of_actions
 no_probs = {'left':0, 'right':0, 'up':0, 'down':0}
 random_probs = {'left':0.25, 'right':0.25, 'up':0.25, 'down':0.25}
 current_policy = {0:random_probs.copy(), 1:random_probs.copy(), 2:random_probs.copy(), 3:random_probs.copy(), 4:random_probs.copy(), 5:random_probs.copy(), 6:random_probs.copy(), 7:random_probs.copy(),
@@ -180,7 +159,6 @@ def calculate_value(state, arr):
     prob_no_slip = 0.95
     for i, action in enumerate(arr):
         if env.what_tile(env.get_tile(state)) == "crack" or env.what_tile(env.get_tile(state)) == "goal":
-            # return calculate_value(12, env.surroundings_of(12))
             value = 0
         elif out_of_bounds(action):
             value = 1*(0 + discount_factor * state_values[state]) #Out of bounds direction will have same value for slipping so can be combined into prob 1
@@ -208,36 +186,16 @@ def policy_iteration_init(simple):
     print("State values:", state_values)
 
 def get_optimal_path():
-    # state = 12
-    # path = []
-    # while True:
-    #     sur = env.surroundings_of(state)
-    #     pot_states = []
-    #     for coor in sur:
-    #         if out_of_bounds(coor):
-    #             pot_states.append(0)
-    #         else:
-    #             state = table[coor[1]][coor[0]]
-    #             pot_states.append(state_values[state])
-    #     index = np.argmax(pot_states)
-    #     path_coor = sur[index]
-    #     state = table[path_coor[1]][path_coor[0]]
-    #     path.append(state)
-    #     if state == 2:
-    #         return path
     policy = dict.fromkeys(np.zeros(16))
     for state in range(16):
         sur = env.surroundings_of(state)
         actions = calculate_value(state, sur)
         print(state, actions)
         best_a = max(actions, key=itemgetter(0))
-        # Always take the best action
         policy[state] = best_a[1]
-    print(policy)
+    return policy
 
 def value_iteration():
-    # delta = 0
-    # while delta < theta:
     stop_condition = 0.0001
     index = 0
     while True:
@@ -245,38 +203,27 @@ def value_iteration():
         for state in range(num_states):
             sur = env.surroundings_of(state)
             actions = calculate_value(state, sur)  # gets the values of each action so the value for all 4 next states
-            # with exception of state == crack then values are 0 or when state is goal then values are 100
-            #print(state, actions)
             best_action_value = max([value[0] for value in actions])  # get the value of the best action.
-            difference = max(difference, np.abs(best_action_value - state_values[state])) # this delta method did not work for me
-            # wonder why
+            difference = max(difference, np.abs(best_action_value - state_values[state]))
             state_values[state] = best_action_value
         index += 1
         print("Value iteration:",index)
         if difference < stop_condition:
             break
 
-    # print(state_values, "\n")
-
-    # #Create the value table
-    # value_matrix = list(map(list,table))
-    # counter = 0
-    # for i in range(4):
-    #     for j in range(4):
-    #         value_matrix[i][j] = state_values[counter]
-    #         counter += 1
-    # for i in range(4):
-    #     print(value_matrix[i])
-    # print(state_values)
-
-    # Check according to the value table what the best path is.
-
-    #state_values[3]=100
-    get_optimal_path()
+    print("optimal policy", get_optimal_path())
     print("values", state_values)
 
 t1 = t.time()
-#value_iteration()
-policy_iteration_init(True)
+
+##Uncomment for Value iteration
+value_iteration()
+
+##Uncomment for Howards Policy Iteration
+#policy_iteration_init(True)
+
+##Uncomment for Simple policy iteration
+##policy_iteration_init(True)
+
 t2 = t.time()
 print("Time elapsed:",t2-t1)
