@@ -4,7 +4,7 @@
           Instead, parameter noise proved more efficient than action noise (Plappert et al., 2018) as an exploration method.
         b. By learning an environment model, if the environment is simple enough (for instance, approachable by a linear model 
           instead of a nonlinear one).
-        c. Avoiding the notion of learning from scratch, and instead using existing (suboptimal) policies as a starting point. 
+        c. Avoiding learning from scratch, and instead using existing (suboptimal) policies as a starting point. 
         d. Better abstraction of actions and states
         
 - Why is sample efficiency so important in real-world applications of reinforcement learning?
