@@ -9,7 +9,7 @@
         d. Better abstraction of actions and states
         
 - Why is sample efficiency so important in real-world applications of reinforcement learning?
-        a. The rich dimensionality of our natural environment results in the necessity of a much larger sample number for learning; 
+        a. The rich dimensionality of our natural environment results in the necessity of a much larger sample number for learning: 
           Due to the fact that there is a seemingly infinite number of possible states, and a learning agent usually develops 
           by knowledge of combinations of states and actions (and possibly reward and new states), it may take a very long time 
           to sample certain situations and thus learn from them. Without any additional measures, it could therefore take an agent 
@@ -17,6 +17,8 @@
           would then be very desirable.
         
 - If you want to implement your idea for additional points (max 2.5), discuss with teacher first
+        1. Parameter space noise
+        2. Richer sampling
 
 
         
