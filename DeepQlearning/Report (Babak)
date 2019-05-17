@@ -5,6 +5,7 @@
         b. By learning an environment model, if the environment is simple enough (for instance, approachable by a linear model 
           instead of a nonlinear one).
         c. Avoiding learning from scratch, and instead using existing (suboptimal) policies as a starting point. 
+        d. Efficient exploration by random starting points (richer sampling).
         d. Better abstraction of actions and states
         
 - Why is sample efficiency so important in real-world applications of reinforcement learning?
