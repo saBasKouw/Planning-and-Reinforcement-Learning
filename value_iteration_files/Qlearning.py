@@ -27,6 +27,46 @@ def move_rob(move, rob):
         rob.move(0, +1)
 
 
+def slip(rob, env):
+    if rob.direction == "left":
+        for i in range(rob.x):
+            rob.move(-1, 0)
+            if env.is_on_crack(rob):
+                break
+    elif rob.direction == "right":
+        for i in range(DIM - rob.x):
+            rob.move(+1, 0)
+            if env.is_on_crack(rob):
+                break
+    elif rob.direction == "up":
+        for i in range(rob.y):
+            rob.move(0, -1)
+            if env.is_on_crack(rob):
+                break
+    elif rob.direction == "down":
+        for i in range(DIM - rob.y):
+            rob.move(0, +1)
+            if env.is_on_crack(rob):
+                break
+
+
+def should_slip(rob, env):
+    slip_chance = [0.05, 0.95]
+    result = np.random.choice(2, 1, p=slip_chance)
+    if result == 0:
+        slip(rob, env)
+
+def slip_transition(s_prime):
+    direction = s_prime[2]
+    rob.direction = direction
+    rob.x = s_prime[0]
+    rob.y = s_prime[1]
+    slip(rob, env)
+    slip_state = env.index_of_state(rob.x, rob.y)
+    slip_reward = tile_reward(env.get_tile(slip_state), env)
+    return slip_reward, slip_state
+
+
 def init_world():
     return Robot(STARTING_POS[0], STARTING_POS[1]), Environment()
 
@@ -39,7 +79,7 @@ qtable = np.zeros((num_states, num_actions))
 
 alpha = 0.1
 gamma = 0.8
-epsilon = 0.5
+epsilon = 0.1
 
 
 def tile_reward(tile, env, ship_taken):
@@ -61,7 +101,7 @@ def run_episodes(softmax_enabled):
     for i in range(1000):
         while True:
             if not softmax_enabled:
-                if random.uniform(0, 1) > epsilon:
+                if random.uniform(0, 1) < epsilon:
                     # Check the action space
                     action = np.random.choice(4)
                 else:
@@ -70,9 +110,10 @@ def run_episodes(softmax_enabled):
                 action = softmax(state)
             move_rob(action, rob)
             new_state = env.index_of_state(rob.x, rob.y)
+            #print(new_state)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
-            if new_state == 10:
-                ship_taken = True
+            #if new_state == 10:
+            #     ship_taken = True
             max = np.max(qtable[new_state])
             value = qtable[state, action]
             newval = value + alpha * (reward+(gamma*max)-value)
@@ -91,7 +132,7 @@ def run_episodesSARSA():
     state = 12
     ship_taken = False
     for i in range(1000):
-        if random.uniform(0, 1) > epsilon:
+        if random.uniform(0, 1) < epsilon:
             # Check the action space
             action = np.random.choice(4)
         else:
@@ -100,8 +141,8 @@ def run_episodesSARSA():
             move_rob(action, rob)
             new_state = env.index_of_state(rob.x, rob.y)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
-            if new_state == 10:
-                ship_taken = True
+            # if new_state == 10:
+            #     ship_taken = True
             if random.uniform(0, 1) < epsilon:
                 # Check the action space
                 next_action = np.random.choice(4)
