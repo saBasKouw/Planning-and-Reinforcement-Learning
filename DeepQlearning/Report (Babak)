@@ -1,7 +1,8 @@
 13.
 - Do you see any other way to increase the sample-efficiency of Q-learning? 
         a. Efficient exploration of the environment. Using E-greedy exploration methods may introduce difficulties in policy updating. 
-          Instead, parameter noise proved more efficient than action noise (Plappert et al., 2018) as an exploration method.
+          Instead, parameter noise proved more efficient than action noise (Plappert et al., 2018) as an exploration method. This gives
+          for richer behaviour and more stable policy.
         b. By learning an environment model, if the environment is simple enough (for instance, approachable by a linear model 
           instead of a nonlinear one).
         c. Avoiding learning from scratch, and instead using existing (suboptimal) policies as a starting point. 
@@ -9,7 +10,7 @@
         d. Better abstraction of actions and states
         
 - Why is sample efficiency so important in real-world applications of reinforcement learning?
-        a. The rich dimensionality of our natural environment results in the necessity of a much larger sample number for learning: 
+        The rich dimensionality of our natural environment results in the necessity of a much larger sample number for learning: 
           Due to the fact that there is a seemingly infinite number of possible states, and a learning agent usually develops 
           by knowledge of combinations of states and actions (and possibly reward and new states), it may take a very long time 
           to sample certain situations and thus learn from them. Without any additional measures, it could therefore take an agent 
@@ -17,8 +18,10 @@
           would then be very desirable.
         
 - If you want to implement your idea for additional points (max 2.5), discuss with teacher first
-        1. Parameter space noise
-        2. Richer sampling
+        1. Parameter space noise:
+                Action space is not sampled for every action, rather a gaussian noise is added to the parameters (weights)
+                of the neural network for every episode. More precisely, within-layer normalisation is applied to respect
+                (scale of) differences in noise sensitivity of each layer.
 
 
         
