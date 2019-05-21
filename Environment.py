@@ -16,6 +16,19 @@ class Environment:
         elif tile == 3:
             return "ship"
 
+    def surroundings(self, robot):
+        x, y = robot.x, robot.y
+        surroundings = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+        result = []
+        for coor in surroundings:
+            x, y = coor[0], coor[1]
+            if x < 0 or x > 3 or y < 0 or y > 3:
+                result.append(-1)
+            else:
+                result.append(self.map[y][x])
+        return result
+
+
     def is_on_ice(self, rob):
         tile = self.what_tile(rob)
         return tile == "ice"
