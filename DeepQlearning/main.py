@@ -35,9 +35,9 @@ class DQNAgent:
         self.memory = deque(maxlen=4000)
         self.gamma = 0.95
         self.epsilon = 1.0
-        self.epsilon_decay = 0.995
+        self.epsilon_decay = 0.9998
         self.epsilon_min = 0.01
-        self.learning_rate = 0.001
+        self.learning_rate = 0.0001
         self.model = self._build_model()
 
     def _build_model(self):
@@ -143,7 +143,7 @@ rob, env = init_world()
 deaths = 0
 reached_goal = 0
 
-n_episodes = 1000
+n_episodes = 5000
 state_size = 4
 action_size = 4
 scores = []
@@ -155,6 +155,8 @@ agent = DQNAgent(state_size, action_size)
 
 for episode in range(n_episodes):
     done = False
+    reward = 0
+    states = []
     while True:
 
         state = env.surroundings(rob)
@@ -171,28 +173,30 @@ for episode in range(n_episodes):
         next_state = env.surroundings(rob)
         next_state = np.reshape(next_state, [1, state_size])
 
-        distance = math.hypot(3-rob.x, 0-rob.y)
+        # distance = math.hypot(3-rob.x, 0-rob.y)
 
         if env.is_on_crack(rob):
             deaths += 1
-            reward = -10
+            reward -= 10
             done = True
 
         elif env.is_on_goal(rob):
             reached_goal += 1
-            reward = 100
+            reward += 100
             done = True
         elif env.is_on_ship(rob):
-            env.map[rob.y][rob.x] = 4
-            reward = 20
-        elif check_already_been(rob, old_track):
-            reward = -20
-        else:
-            reward = 0
+            reward += 20
 
-        agent.remember(state, action, reward, next_state, done)
+        else:
+            reward += 0
+
+        states.append([state, action, reward, next_state, done])
+        # agent.remember(state, action, reward, next_state, done)
 
         if done:
+            for state in states:
+                state[2] = reward
+                agent.remember(state[0], state[1], state[2], state[3], state[4])
             rob, env = init_world()
             break
 
@@ -207,7 +211,9 @@ for episode in range(n_episodes):
                 state = env.surroundings(rob)
                 state = np.reshape(state, [1, state_size])
 
-                action = agent.act(state)
+                act_values = agent.model.predict(state)
+                action = np.argmax(act_values[0])
+                # action = agent.act(state)
                 move_rob(action, rob)
 
                 if env.is_on_crack(rob):
@@ -216,12 +222,10 @@ for episode in range(n_episodes):
                 elif env.is_on_goal(rob):
                     reached_goal += 1
                     done = True
-                if done:
-                    rob, env = init_world()
+                if done or i == 19:
                     track = rob.track
+                    rob, env = init_world()
                     break
-                if i == 19:
-                    out_time += 1
         print(track)
         print(
             "episode: {}/{}, score: {}, e: {:.6}".format(episode, n_episodes, reached_goal/100, agent.epsilon))
