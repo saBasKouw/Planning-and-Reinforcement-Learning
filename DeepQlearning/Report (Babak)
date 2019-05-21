@@ -21,7 +21,8 @@
         1. Parameter space noise:
                 Action space is not sampled for every action, rather a gaussian noise is added to the parameters (weights)
                 of the neural network for every episode. More precisely, within-layer normalisation is applied to respect
-                (scale of) differences in noise sensitivity of each layer.
+                (scale of) differences in noise sensitivity of each layer. This addition to the basic Q-learning implementation
+                is especially useful when the reward is sparse (Plappert et al., 2018). This somewhat applies to the current problem.
 
 
         
