@@ -7,7 +7,8 @@
           instead of a nonlinear one).
         c. Avoiding learning from scratch, and instead using existing (suboptimal) policies as a starting point. 
         d. Efficient exploration by random starting points (richer sampling).
-        d. Better abstraction of actions and states
+        e. Better abstraction of actions and states. The lower the number of possible actions and states (without trading completeness
+          of the representation of the environment, and avoiding over-reduction), the less samples required to learn on.
         
 - Why is sample efficiency so important in real-world applications of reinforcement learning?
         The rich dimensionality of our natural environment results in the necessity of a much larger sample number for learning: 
