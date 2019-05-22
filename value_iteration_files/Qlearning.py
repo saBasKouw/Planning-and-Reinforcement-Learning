@@ -11,6 +11,7 @@ UP = 2
 DOWN = 3
 DIM = 4
 ROBOT_SYM = 8
+action_dict = {0: "left", 1: "right", 2: "up", 3: "down"}
 
 def move_rob(move, rob):
     if move == LEFT:
@@ -55,6 +56,8 @@ def should_slip(rob, env):
     result = np.random.choice(2, 1, p=slip_chance)
     if result == 0:
         slip(rob, env)
+        return True
+    return False
 
 def slip_transition(s_prime):
     direction = s_prime[2]
@@ -98,7 +101,7 @@ def tile_reward(tile, env, ship_taken):
 def run_episodes(softmax_enabled):
     state = 12
     ship_taken = False
-    for i in range(1000):
+    for i in range(10000):
         while True:
             if not softmax_enabled:
                 if random.uniform(0, 1) < epsilon:
@@ -107,8 +110,10 @@ def run_episodes(softmax_enabled):
                 else:
                     action = np.argmax(qtable[state])
             else:
-                action = softmax(state)
-            move_rob(action, rob)
+                action = softmax(state)[0]
+            rob.direction = action_dict[action]
+            if not should_slip(rob,env):
+                move_rob(action, rob)
             new_state = env.index_of_state(rob.x, rob.y)
             #print(new_state)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
@@ -119,6 +124,7 @@ def run_episodes(softmax_enabled):
             newval = value + alpha * (reward+(gamma*max)-value)
             qtable[state][action] = newval
             state = new_state
+            print(state)
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
                 # print(np.argmax(qtable[10]))
                 state = 12
@@ -131,7 +137,7 @@ def run_episodes(softmax_enabled):
 def run_episodesSARSA():
     state = 12
     ship_taken = False
-    for i in range(1000):
+    for i in range(10000):
         if random.uniform(0, 1) < epsilon:
             # Check the action space
             action = np.random.choice(4)
@@ -155,6 +161,7 @@ def run_episodesSARSA():
             qtable[state][action] = newval
             state = new_state
             action = next_action
+            print(state)
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
                 state = 12
                 rob.x = STARTING_POS[0]
@@ -164,7 +171,7 @@ def run_episodesSARSA():
 
 def softmax(state):
     probs = np.zeros(4)
-    temp = 1
+    temp = 0.5
     for i in range(4):
         probs[i] = np.exp((qtable[state][i]/temp))
     probs = probs/sum(probs)
@@ -172,7 +179,6 @@ def softmax(state):
 
 def get_path():
     state = 12
-    action_dict = {0:"left",1:"right",2:"up",3:"down"}
     path = []
     while state != 3:
         max = np.argmax(qtable[state])
