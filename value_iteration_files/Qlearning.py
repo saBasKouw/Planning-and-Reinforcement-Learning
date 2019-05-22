@@ -84,7 +84,7 @@ qtable = np.zeros((num_states, num_actions))
 
 alpha = 0.1
 gamma = 0.8
-epsilon = 0.1
+epsilon = 0.5
 
 
 def tile_reward(tile, env, ship_taken):
@@ -112,6 +112,8 @@ def replay(batch_size=10):
 def run_episodes(softmax_enabled=False, experience_replay=False):
     state = 12
     ship_taken = False
+    cumalitive_reward = 0
+    penalty = 0
     for i in range(10000):
         while True:
             if not softmax_enabled:
@@ -128,7 +130,9 @@ def run_episodes(softmax_enabled=False, experience_replay=False):
             new_state = env.index_of_state(rob.x, rob.y)
             #print(new_state)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
-
+            cumalitive_reward += reward
+            if reward == -10:
+                penalty += 1
             if experience_replay:
                 memory.append([state, action, reward, new_state])
             else:
@@ -138,7 +142,6 @@ def run_episodes(softmax_enabled=False, experience_replay=False):
                 qtable[state][action] = newval
 
             state = new_state
-            print(state)
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
                 if experience_replay:
                     replay()
@@ -150,10 +153,14 @@ def run_episodes(softmax_enabled=False, experience_replay=False):
                 rob.direction = ""
                 break
 
+    return cumalitive_reward, penalty
+
 
 def run_episodesSARSA():
     state = 12
     ship_taken = False
+    cumalitive_reward = 0
+    penalty = 0
     for i in range(10000):
         if random.uniform(0, 1) < epsilon:
             # Check the action space
@@ -164,6 +171,9 @@ def run_episodesSARSA():
             move_rob(action, rob)
             new_state = env.index_of_state(rob.x, rob.y)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
+            cumalitive_reward += reward
+            if reward == -10:
+                penalty += 1
             if random.uniform(0, 1) < epsilon:
                 # Check the action space
                 next_action = np.random.choice(4)
@@ -183,6 +193,7 @@ def run_episodesSARSA():
                 rob.y = STARTING_POS[1]
                 rob.direction = ""
                 break
+    return cumalitive_reward, penalty
 
 def softmax(state):
     probs = np.zeros(4)
@@ -203,9 +214,25 @@ def get_path():
         path.append(new_state)
         print("Index: ",state, "Q value: ", qtable[state])
         state = new_state
-    print(path)
+    return path
 
 
 #run_episodes(softmax_enabled=False)
-run_episodes(softmax_enabled=False, experience_replay=True)
-get_path()
+# run_episodes(softmax_enabled=False, experience_replay=True)
+# get_path()
+
+cuml_rewards = []
+paths = []
+penaltys = []
+for i in range(10):
+    cuml_reward, penalty = run_episodes(softmax_enabled=False,experience_replay=False)
+    #cuml_reward, penalty = run_episodesSARSA()
+    cuml_rewards.append(cuml_reward)
+    penaltys.append(penalty)
+    #cuml_rewards.append(run_episodesSARSA())
+    paths.append(get_path())
+
+print(cuml_rewards)
+print(paths)
+print(sum(cuml_rewards)/len(cuml_rewards))
+print(sum(penaltys)/len(penaltys))
