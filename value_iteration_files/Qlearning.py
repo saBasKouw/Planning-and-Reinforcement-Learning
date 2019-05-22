@@ -13,6 +13,8 @@ DIM = 4
 ROBOT_SYM = 8
 action_dict = {0: "left", 1: "right", 2: "up", 3: "down"}
 
+memory = []
+
 def move_rob(move, rob):
     if move == LEFT:
         rob.direction = "left"
@@ -97,8 +99,16 @@ def tile_reward(tile, env, ship_taken):
 
         return 0
 
+def replay(batch_size=10):
+    minibatch = random.sample(memory, batch_size)
+    for state, action, reward, new_state in minibatch:
+        max = np.max(qtable[new_state])
+        value = qtable[state, action]
+        newval = value + alpha * (reward + (gamma * max) - value)
+        qtable[state][action] = newval
 
-def run_episodes(softmax_enabled):
+
+def run_episodes(softmax_enabled=False, experience_replay=False):
     state = 12
     ship_taken = False
     for i in range(10000):
@@ -117,15 +127,21 @@ def run_episodes(softmax_enabled):
             new_state = env.index_of_state(rob.x, rob.y)
             #print(new_state)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
-            #if new_state == 10:
-            #     ship_taken = True
-            max = np.max(qtable[new_state])
-            value = qtable[state, action]
-            newval = value + alpha * (reward+(gamma*max)-value)
-            qtable[state][action] = newval
+
+            if experience_replay:
+                memory.append([state, action, reward, new_state])
+            else:
+                max = np.max(qtable[new_state])
+                value = qtable[state, action]
+                newval = value + alpha * (reward + (gamma * max) - value)
+                qtable[state][action] = newval
+
             state = new_state
             print(state)
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
+                if experience_replay:
+                    replay()
+
                 # print(np.argmax(qtable[10]))
                 state = 12
                 rob.x = STARTING_POS[0]
@@ -147,8 +163,6 @@ def run_episodesSARSA():
             move_rob(action, rob)
             new_state = env.index_of_state(rob.x, rob.y)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
-            # if new_state == 10:
-            #     ship_taken = True
             if random.uniform(0, 1) < epsilon:
                 # Check the action space
                 next_action = np.random.choice(4)
@@ -192,5 +206,5 @@ def get_path():
 
 
 #run_episodes(softmax_enabled=False)
-run_episodesSARSA()
+run_episodes(softmax_enabled=False, experience_replay=True)
 get_path()
