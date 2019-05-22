@@ -100,12 +100,13 @@ def tile_reward(tile, env, ship_taken):
         return 0
 
 def replay(batch_size=10):
-    minibatch = random.sample(memory, batch_size)
-    for state, action, reward, new_state in minibatch:
-        max = np.max(qtable[new_state])
-        value = qtable[state, action]
-        newval = value + alpha * (reward + (gamma * max) - value)
-        qtable[state][action] = newval
+    if len(memory) > batch_size:
+        minibatch = random.sample(memory, batch_size)
+        for state, action, reward, new_state in minibatch:
+            max = np.max(qtable[new_state])
+            value = qtable[state, action]
+            newval = value + alpha * (reward + (gamma * max) - value)
+            qtable[state][action] = newval
 
 
 def run_episodes(softmax_enabled=False, experience_replay=False):
