@@ -5,6 +5,7 @@ import random
 import matplotlib.pyplot as plt
 import time as t
 from collections import deque
+from collections import defaultdict
 
 STARTING_POS = [0, 3]
 
@@ -116,7 +117,7 @@ rewards = []
 def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, temperature = 0.5):
     state = 12
     ship_taken = False
-    cumalitive_reward = 0
+    cumulative_reward = 0
     penalty = 0
     for i in range(10000):
         while True:
@@ -134,7 +135,7 @@ def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, tem
             new_state = env.index_of_state(rob.x, rob.y)
             #print(new_state)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
-            cumalitive_reward += reward
+            cumulative_reward += reward
             if reward == -10:
                 penalty += 1
             if experience_replay:
@@ -149,7 +150,7 @@ def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, tem
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
                 if experience_replay:
                     replay()
-                rewards.append(cumalitive_reward)
+                rewards.append(cumulative_reward)
                 # print(np.argmax(qtable[10]))
                 state = 12
                 rob.x = STARTING_POS[0]
@@ -157,13 +158,13 @@ def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, tem
                 rob.direction = ""
                 break
 
-    return cumalitive_reward, penalty
+    return cumulative_reward, penalty
 
 
 def run_episodesSARSA(epsilon=0.1):
     state = 12
     ship_taken = False
-    cumalitive_reward = 0
+    cumulative_reward = 0
     penalty = 0
     for i in range(10000):
         if random.uniform(0, 1) < epsilon:
@@ -175,7 +176,7 @@ def run_episodesSARSA(epsilon=0.1):
             move_rob(action, rob)
             new_state = env.index_of_state(rob.x, rob.y)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
-            cumalitive_reward += reward
+            cumulative_reward += reward
 
 
             if experience_replay:
@@ -196,13 +197,13 @@ def run_episodesSARSA(epsilon=0.1):
             state = new_state
             action = next_action
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
-                rewards.append(cumalitive_reward)
+                rewards.append(cumulative_reward)
                 state = 12
                 rob.x = STARTING_POS[0]
                 rob.y = STARTING_POS[1]
                 rob.direction = ""
                 break
-    return cumalitive_reward, penalty
+    return cumulative_reward, penalty
 
 def softmax(state,temp=0.5):
     probs = np.zeros(4)
@@ -225,6 +226,71 @@ def get_path():
         state = new_state
     return path
 
+lamb = 0.95
+
+
+def run_episodesET(episodes, epsilon):
+    eligibility = defaultdict(lambda: np.zeros(num_actions))
+    qtable = defaultdict(lambda: np.zeros(num_actions))
+    ship_taken = False
+    cumulative_reward = 0
+    penalty = 0
+    for episode in range(episodes):
+        state = 12
+        if random.uniform(0, 1) < epsilon:
+            action = np.random.choice(4)
+        else:
+            action = np.argmax(qtable[state])
+        while True:
+            rob.direction = action_dict[action]
+            if not should_slip(rob, env):
+                move_rob(action, rob)
+            new_state = env.index_of_state(rob.x, rob.y)
+            if random.uniform(0, 1) < epsilon:
+                 next_action = np.random.choice(4)
+            else:
+                 next_action = np.argmax(qtable[new_state])
+            reward = tile_reward((rob.x, rob.y), env, ship_taken)
+            cumulative_reward += reward
+            max = np.argmax(qtable[new_state])
+            red_val = reward + gamma * qtable[new_state][max]
+            td_error = red_val - qtable[state][action]
+            # increment the trace to the corresponding state and action with 1
+            eligibility[state][action] += 1
+            for state in qtable:
+                for a in range(len(qtable[state])):
+
+                    # Update Q-table value based on eligibility trace
+                    qtable[state][action] += alpha * td_error * eligibility[state][action]
+
+                    # Decay eligibility trace if action is equal to the max (the best action)
+                    if next_action is max:
+                        eligibility[state][action] = lamb * gamma * eligibility[state][action]
+                    # Reset eligibility trace if random action taken, which will differ depending on the chosen epsilon
+                    else:
+                        eligibility[state][action] = 0
+            state = new_state
+            action = next_action
+            if state == 3 or env.what_tile((rob.x, rob.y)) == "crack":
+                rewards.append(cumulative_reward)
+                state = 12
+                rob.x = STARTING_POS[0]
+                rob.y = STARTING_POS[1]
+                rob.direction = ""
+                break
+    state = 12
+    path = []
+    while state != 3:
+        max = np.argmax(qtable[state])
+        move_direction = action_dict[max]
+        location = [item for item in env.surroundings_of(state) if item[2] == move_direction][0]
+        new_state = env.index_of_state(location[0], location[1])
+        path.append(new_state)
+        print("Index: ", state, "Q value: ", qtable[state])
+        state = new_state
+    #print(path)
+
+    return cumulative_reward, penalty, path
 
 #run_episodes(softmax_enabled=False)
 # run_episodes(softmax_enabled=False, experience_replay=True)
@@ -241,14 +307,19 @@ for e in epsilon_tests:
     for i in range(1):
         t1 = t.time()
         cuml_reward, penalty = run_episodes(softmax_enabled=False, experience_replay=True,epsilon=e)
-        # cuml_reward, penalty = run_episodesSARSA(epsilon=e)
+        #cuml_reward, penalty = run_episodesSARSA(epsilon=e)
+        #cuml_reward, penalty, path = run_episodesET(10000, epsilon=e)
         t2 = t.time()
         print("Time elapsed:",t2-t1)
+
 
         cuml_rewards.append(cuml_reward)
         penaltys.append(penalty)
         #cuml_rewards.append(run_episodesSARSA())
+
+        #change this to 'path' if using ET (which is a return value of the run_episodesET method)
         paths.append(get_path())
+
 
     # cuml_rewards_per_e.append(sum(cuml_rewards)/len(cuml_rewards))
     # cuml_rewards = []
@@ -256,10 +327,12 @@ for e in epsilon_tests:
     rewards = []
     print(rewards)
 plt.legend()
-plt.savefig("plots_qlearn_expreplay.png")
+plt.savefig("plots_qlearn_eligibilitytraces2.png")
 
 print(cuml_rewards)
 # print(cuml_rewards_per_e)
 print(paths)
 # print(sum(cuml_rewards)/len(cuml_rewards))
 print(sum(penaltys)/len(penaltys))
+
+#run_episodesET(10000, 0.3)
