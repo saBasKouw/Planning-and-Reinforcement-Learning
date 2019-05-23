@@ -104,6 +104,7 @@ def tile_reward(tile, env, ship_taken):
 
         return 0
 
+#Experience Replay
 def replay(batch_size=10):
     if len(memory) > batch_size:
         minibatch = random.sample(memory, batch_size)
@@ -114,6 +115,8 @@ def replay(batch_size=10):
             qtable[state][action] = newval
 
 rewards = []
+
+#Q-learning, standard. Choose for activating softmax or experience replay by setting their values on true.
 def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, temperature = 0.5):
     state = 12
     ship_taken = False
@@ -160,7 +163,7 @@ def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, tem
 
     return cumulative_reward, penalty
 
-
+#SARSA
 def run_episodesSARSA(epsilon=0.1):
     state = 12
     ship_taken = False
@@ -228,7 +231,7 @@ def get_path():
 
 lamb = 0.95
 
-
+#Eligibility traces
 def run_episodesET(episodes, epsilon):
     eligibility = defaultdict(lambda: np.zeros(num_actions))
     qtable = defaultdict(lambda: np.zeros(num_actions))
