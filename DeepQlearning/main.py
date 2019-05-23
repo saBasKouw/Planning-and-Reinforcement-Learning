@@ -24,7 +24,7 @@ DOWN = 's'
 DIM = 4
 ROBOT_SYM = 8
 
-batch_size = 64
+batch_size = 128
 done = False
 
 
@@ -32,12 +32,12 @@ class DQNAgent:
     def __init__(self, state_size, action_size):
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = deque(maxlen=4000)
-        self.gamma = 0.95
+        self.memory = deque(maxlen=1000)
+        self.gamma = 0.99
         self.epsilon = 1.0
-        self.epsilon_decay = 0.9998
+        self.epsilon_decay = 0.99995
         self.epsilon_min = 0.01
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.001
         self.model = self._build_model()
 
     def _build_model(self):
@@ -48,8 +48,8 @@ class DQNAgent:
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
 
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+    def remember(self, state, action, reward, next_state, fin_reward, done):
+        self.memory.append((state, action, reward, next_state, fin_reward, done))
 
     def act(self, state):
         if np.random.rand() <= self.epsilon:
@@ -59,10 +59,10 @@ class DQNAgent:
 
     def replay(self, batch_size):
         minibatch = random.sample(self.memory, batch_size)
-        for state, action, reward, next_state, done in minibatch:
+        for state, action, reward, next_state, fin_reward, done in minibatch:
             target = reward
             if not done:
-                target = (reward + self.gamma * np.argmax(self.model.predict(next_state)[0]))
+                target = (reward + self.gamma * fin_reward)
             target_future = self.model.predict(state)
             target_future[0][action] = target
 
@@ -143,7 +143,7 @@ rob, env = init_world()
 deaths = 0
 reached_goal = 0
 
-n_episodes = 5000
+n_episodes = 1000
 state_size = 4
 action_size = 4
 scores = []
@@ -152,6 +152,7 @@ agent = DQNAgent(state_size, action_size)
 
 
 
+cum_rewards = 0
 
 for episode in range(n_episodes):
     done = False
@@ -194,9 +195,12 @@ for episode in range(n_episodes):
         # agent.remember(state, action, reward, next_state, done)
 
         if done:
+            cum_rewards += reward
+            scores.append(cum_rewards)
+
             for state in states:
-                state[2] = reward
-                agent.remember(state[0], state[1], state[2], state[3], state[4])
+                fin_reward = reward
+                agent.remember(state[0], state[1], state[2], state[3], fin_reward, state[4])
             rob, env = init_world()
             break
 
@@ -234,7 +238,7 @@ for episode in range(n_episodes):
         agent.replay(batch_size)
 
 
-
+print(sum(scores)/len(scores))
 plt.plot(scores)
 plt.show()
 

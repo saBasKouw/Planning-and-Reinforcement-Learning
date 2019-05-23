@@ -4,6 +4,7 @@ from Robot import Robot
 import random
 import matplotlib.pyplot as plt
 import time as t
+from collections import deque
 
 STARTING_POS = [0, 3]
 
@@ -15,7 +16,8 @@ DIM = 4
 ROBOT_SYM = 8
 action_dict = {0: "left", 1: "right", 2: "up", 3: "down"}
 
-memory = []
+memory = deque(maxlen=20)
+# memory = []
 
 def move_rob(move, rob):
     if move == LEFT:
@@ -133,7 +135,6 @@ def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, tem
             #print(new_state)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
             cumalitive_reward += reward
-            rewards.append(cumalitive_reward)
             if reward == -10:
                 penalty += 1
             if experience_replay:
@@ -148,7 +149,7 @@ def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, tem
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
                 if experience_replay:
                     replay()
-
+                rewards.append(cumalitive_reward)
                 # print(np.argmax(qtable[10]))
                 state = 12
                 rob.x = STARTING_POS[0]
@@ -175,7 +176,11 @@ def run_episodesSARSA(epsilon=0.1):
             new_state = env.index_of_state(rob.x, rob.y)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
             cumalitive_reward += reward
-            rewards.append(cumalitive_reward)
+
+
+            if experience_replay:
+                memory.append([state, action, reward, new_state])
+
             if reward == -10:
                 penalty += 1
             if random.uniform(0, 1) < epsilon:
@@ -191,6 +196,7 @@ def run_episodesSARSA(epsilon=0.1):
             state = new_state
             action = next_action
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
+                rewards.append(cumalitive_reward)
                 state = 12
                 rob.x = STARTING_POS[0]
                 rob.y = STARTING_POS[1]
@@ -215,7 +221,7 @@ def get_path():
         location = [item for item in env.surroundings_of(state) if item[2]==move_direction][0]
         new_state = env.index_of_state(location[0],location[1])
         path.append(new_state)
-        print("Index: ",state, "Q value: ", qtable[state])
+        # print("Index: ",state, "Q value: ", qtable[state])
         state = new_state
     return path
 
@@ -224,6 +230,8 @@ def get_path():
 # run_episodes(softmax_enabled=False, experience_replay=True)
 # get_path()
 
+
+cuml_rewards_per_e = []
 cuml_rewards = []
 paths = []
 penaltys = []
@@ -232,8 +240,8 @@ temp_tests = [0.5,0.8]
 for e in epsilon_tests:
     for i in range(1):
         t1 = t.time()
-        cuml_reward, penalty = run_episodes(softmax_enabled=False,experience_replay=False,epsilon=e)
-        #cuml_reward, penalty = run_episodesSARSA(epsilon=e)
+        cuml_reward, penalty = run_episodes(softmax_enabled=False, experience_replay=True,epsilon=e)
+        # cuml_reward, penalty = run_episodesSARSA(epsilon=e)
         t2 = t.time()
         print("Time elapsed:",t2-t1)
 
@@ -241,13 +249,17 @@ for e in epsilon_tests:
         penaltys.append(penalty)
         #cuml_rewards.append(run_episodesSARSA())
         paths.append(get_path())
+
+    # cuml_rewards_per_e.append(sum(cuml_rewards)/len(cuml_rewards))
+    # cuml_rewards = []
     plt.plot(rewards,label=e)
     rewards = []
     print(rewards)
 plt.legend()
-plt.savefig("plots_qlearn_softmax.png")
+plt.savefig("plots_qlearn_expreplay.png")
 
 print(cuml_rewards)
+# print(cuml_rewards_per_e)
 print(paths)
-print(sum(cuml_rewards)/len(cuml_rewards))
+# print(sum(cuml_rewards)/len(cuml_rewards))
 print(sum(penaltys)/len(penaltys))
