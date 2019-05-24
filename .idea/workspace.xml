@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e916fbc4-c340-4e63-b967-898eeedcd30c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/value_iteration_files/Qlearning.py" afterPath="$PROJECT_DIR$/value_iteration_files/Qlearning.py" />
-      <change beforePath="$PROJECT_DIR$/value_iteration_files/plots_qlearn.png" afterPath="$PROJECT_DIR$/value_iteration_files/plots_qlearn.png" />
-    </list>
+    <list default="true" id="e916fbc4-c340-4e63-b967-898eeedcd30c" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -59,7 +55,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Qlearning.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Qlearning.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/value_iteration_files/Qlearning.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="373">
@@ -71,15 +67,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="assignment2.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/Downloads/ReinforcementLearning-master/ReinforcementLearning-master/assignment2.py">
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1194">
-              <caret line="97" column="39" lean-forward="false" selection-start-line="97" selection-start-column="39" selection-end-line="97" selection-end-column="39" />
-              <folding>
-                <marker date="1558684221886" expanded="true" signature="2431:2619" ph="..." />
-                <marker date="1558684221886" expanded="true" signature="2435:2564" ph="..." />
-              </folding>
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -369,15 +362,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Robot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Actions.py" />
     <entry file="file://$PROJECT_DIR$/Robot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="400">
@@ -702,6 +686,25 @@
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Downloads/ReinforcementLearning-master/ReinforcementLearning-master/assignment2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1194">
+          <caret line="97" column="39" lean-forward="false" selection-start-line="97" selection-start-column="39" selection-end-line="97" selection-end-column="39" />
+          <folding>
+            <marker date="1558684221886" expanded="true" signature="2431:2619" ph="..." />
+            <marker date="1558684221886" expanded="true" signature="2435:2564" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
