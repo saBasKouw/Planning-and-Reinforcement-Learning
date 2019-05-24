@@ -1,6 +1,6 @@
 import numpy as np
-from value_iteration_files.Environment import Environment
-from Robot import Robot
+from Assignment1.value_iteration_files.Environment import Environment
+from Assignment1.Robot import Robot
 import random
 import matplotlib.pyplot as plt
 import time as t

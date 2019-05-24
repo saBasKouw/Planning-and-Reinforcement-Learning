@@ -1,6 +1,6 @@
 import numpy as np
-from value_iteration_files.Environment import Environment
-from Robot import Robot
+from Assignment1.value_iteration_files.Environment import Environment
+from Assignment1.Robot import Robot
 import random
 import matplotlib.pyplot as plt
 import time as t
@@ -209,7 +209,6 @@ def softmax(state,temp=20):
     for i in range(4):
         probs[i] = np.exp((np.array(qtable[state][i])/temp))
     probs = probs/sum(probs)
-    print(probs)
     return np.random.choice(4,p=probs)
 
 def get_path():
@@ -291,9 +290,57 @@ def run_episodesET(episodes, epsilon):
 
     return cumulative_reward, penalty
 
-#run_episodes(softmax_enabled=False)
-# run_episodes(softmax_enabled=False, experience_replay=True)
-# get_path()
+def run_sample_efficiency(softmax_enabled=False, experience_replay=False,epsilon=0.1, temperature = 0.5):
+    state = 12
+    ship_taken = False
+    cumulative_reward = 0
+    penalty = 0
+    for i in range(1000):
+        while True:
+            if not softmax_enabled:
+                if random.uniform(0, 1) < epsilon:
+                    # Check the action space
+                    action = np.random.choice(4)
+                else:
+                    action = np.argmax(qtable[state])
+            else:
+                action = softmax(state,temperature)
+            rob.direction = action_dict[action]
+            if not should_slip(rob,env):
+                move_rob(action, rob)
+            new_state = env.index_of_state(rob.x, rob.y)
+            #print(new_state)
+            reward = tile_reward((rob.x, rob.y), env, ship_taken)
+            cumulative_reward += reward
+            max = np.max(qtable[new_state])
+            value = qtable[state, action]
+            newval = value + alpha * (reward + (gamma * max) - value)
+            qtable[state][action] = newval
+
+            state = new_state
+            if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
+                # if divmod(i, 10)[1] == 0 and i<100:
+                    # print("total reward:", cumulative_reward)
+                if experience_replay:
+                    replay()
+                rewards.append(cumulative_reward)
+                # print(np.argmax(qtable[10]))
+                if random.uniform(0,100) <101: # chance of random start (100% def)
+                    state = 15
+                    while not env.is_on_ice(rob):
+                        rob.x = random.randint(0,3)
+                        #print('rob x: {0}'.format(rob.x))
+                        rob.y = random.randint(0,3)
+                    state = 4 * rob.y + rob.x
+                else:
+                    state = 12
+                    rob.x = STARTING_POS[0]
+                    rob.y = STARTING_POS[1]
+
+                rob.direction = ""
+                break
+
+    return cumulative_reward, penalty
 
 
 cuml_rewards_per_e = []
@@ -303,20 +350,20 @@ penaltys = []
 epsilon_tests = [0.1,0.3,0.5]
 temp_tests = [20,50,100]
 for e in epsilon_tests:
-    for i in range(5):
+    for i in range(1):
         t1 = t.time()
-        cuml_reward, penalty = run_episodes(softmax_enabled=False, experience_replay=False,epsilon=e)
+        #Uncomment the algorithm to use. Softmax and experience replay can be enabled by putting the parameters to True.
+        cuml_reward, penalty = run_episodes(softmax_enabled=False, experience_replay=False,epsilon=e,temperature=20)
         #cuml_reward, penalty = run_episodesSARSA(epsilon=e)
-        #cuml_reward, penalty= run_episodesET(1000, epsilon=e)
+        #cuml_reward, penalty= run_episodesET(1000, epsilon=e) #Eligibility Traces
+        #cuml_reward,penalty = run_sample_efficiency(False,False,epsilon=e)
         t2 = t.time()
         print("Time elapsed:",t2-t1)
 
 
         cuml_rewards.append(cuml_reward)
         penaltys.append(penalty)
-        #cuml_rewards.append(run_episodesSARSA())
 
-        #change this to 'path' if using ET (which is a return value of the run_episodesET method)
         paths.append(get_path())
 
 

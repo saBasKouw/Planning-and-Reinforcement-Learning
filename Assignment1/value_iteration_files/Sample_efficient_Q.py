@@ -1,4 +1,4 @@
-def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, temperature = 0.5):
+def run_sample_efficiency(softmax_enabled=False, experience_replay=False,epsilon=0.1, temperature = 0.5):
     state = 12
     ship_taken = False
     cumulative_reward = 0
@@ -20,15 +20,10 @@ def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, tem
             #print(new_state)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
             cumulative_reward += reward
-            if reward == -10:
-                penalty += 1
-            if experience_replay:
-                memory.append([state, action, reward, new_state])
-            else:
-                max = np.max(qtable[new_state])
-                value = qtable[state, action]
-                newval = value + alpha * (reward + (gamma * max) - value)
-                qtable[state][action] = newval
+            max = np.max(qtable[new_state])
+            value = qtable[state, action]
+            newval = value + alpha * (reward + (gamma * max) - value)
+            qtable[state][action] = newval
 
             state = new_state
             if state == 3 or env.what_tile((rob.x,rob.y)) == "crack":
@@ -45,7 +40,6 @@ def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, tem
                         #print('rob x: {0}'.format(rob.x))
                         rob.y = random.randint(0,3)
                     state = 4 * rob.y + rob.x
-                    #print("placed")
                 else:
                     state = 12
                     rob.x = STARTING_POS[0]
