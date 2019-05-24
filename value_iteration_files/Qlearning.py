@@ -117,12 +117,12 @@ def replay(batch_size=10):
 rewards = []
 
 #Q-learning, standard. Choose for activating softmax or experience replay by setting their values on true.
-def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, temperature = 0.5):
+def run_episodes(softmax_enabled=False, experience_replay=False,epsilon=0.1, temperature = 20):
     state = 12
     ship_taken = False
     cumulative_reward = 0
     penalty = 0
-    for i in range(10000):
+    for i in range(1000):
         while True:
             if not softmax_enabled:
                 if random.uniform(0, 1) < epsilon:
@@ -169,7 +169,7 @@ def run_episodesSARSA(epsilon=0.1):
     ship_taken = False
     cumulative_reward = 0
     penalty = 0
-    for i in range(10000):
+    for i in range(1000):
         if random.uniform(0, 1) < epsilon:
             # Check the action space
             action = np.random.choice(4)
@@ -180,10 +180,6 @@ def run_episodesSARSA(epsilon=0.1):
             new_state = env.index_of_state(rob.x, rob.y)
             reward = tile_reward((rob.x, rob.y), env, ship_taken)
             cumulative_reward += reward
-
-
-            if experience_replay:
-                memory.append([state, action, reward, new_state])
 
             if reward == -10:
                 penalty += 1
@@ -208,7 +204,7 @@ def run_episodesSARSA(epsilon=0.1):
                 break
     return cumulative_reward, penalty
 
-def softmax(state,temp=0.5):
+def softmax(state,temp=20):
     probs = np.zeros(4)
     for i in range(4):
         probs[i] = np.exp((np.array(qtable[state][i])/temp))
@@ -281,19 +277,19 @@ def run_episodesET(episodes, epsilon):
                 rob.y = STARTING_POS[1]
                 rob.direction = ""
                 break
-    state = 12
-    path = []
-    while state != 3:
-        max = np.argmax(qtable[state])
-        move_direction = action_dict[max]
-        location = [item for item in env.surroundings_of(state) if item[2] == move_direction][0]
-        new_state = env.index_of_state(location[0], location[1])
-        path.append(new_state)
-        print("Index: ", state, "Q value: ", qtable[state])
-        state = new_state
+    # state = 12
+    # path = []
+    # while state != 3:
+    #     max = np.argmax(qtable[state])
+    #     move_direction = action_dict[max]
+    #     location = [item for item in env.surroundings_of(state) if item[2] == move_direction][0]
+    #     new_state = env.index_of_state(location[0], location[1])
+    #     path.append(new_state)
+    #     print("Index: ", state, "Q value: ", qtable[state])
+    #     state = new_state
     #print(path)
 
-    return cumulative_reward, penalty, path
+    return cumulative_reward, penalty
 
 #run_episodes(softmax_enabled=False)
 # run_episodes(softmax_enabled=False, experience_replay=True)
@@ -305,13 +301,13 @@ cuml_rewards = []
 paths = []
 penaltys = []
 epsilon_tests = [0.1,0.3,0.5]
-temp_tests = [0.5,0.8]
+temp_tests = [20,50,100]
 for e in epsilon_tests:
-    for i in range(1):
+    for i in range(5):
         t1 = t.time()
-        cuml_reward, penalty = run_episodes(softmax_enabled=False, experience_replay=True,epsilon=e)
+        cuml_reward, penalty = run_episodes(softmax_enabled=False, experience_replay=False,epsilon=e)
         #cuml_reward, penalty = run_episodesSARSA(epsilon=e)
-        #cuml_reward, penalty, path = run_episodesET(10000, epsilon=e)
+        #cuml_reward, penalty= run_episodesET(1000, epsilon=e)
         t2 = t.time()
         print("Time elapsed:",t2-t1)
 
@@ -330,7 +326,7 @@ for e in epsilon_tests:
     rewards = []
     print(rewards)
 plt.legend()
-plt.savefig("plots_qlearn_eligibilitytraces2.png")
+plt.savefig("plots_qlearn.png")
 
 print(cuml_rewards)
 # print(cuml_rewards_per_e)
